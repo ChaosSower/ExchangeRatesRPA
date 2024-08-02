@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
 using System.Net.Mail;
 using System.Net;
 
@@ -17,7 +18,7 @@ namespace ExchangeRatesRPA
                 Data Data = new();
                 decimal CurrencyRate = await ParseSiteForCurrencyRate(Data.TargetCurrency ?? string.Empty); // получение курса заданной валюты
                 string FilePath = CreateCsvFile(CurrencyRate, Data.TargetCurrency ?? string.Empty); // создание CSV-файла
-                SendEmail(Data.SenderEmail ?? string.Empty, Data.SenderName ?? string.Empty, Data.RecipientEmail ?? string.Empty, Data.RecipientName ?? string.Empty, Data.TargetCurrency ?? string.Empty, FilePath); // отправка файла на почту
+                SendEmail(Data.SenderEmail ?? string.Empty, Data.SenderPassword ?? string.Empty, Data.SenderName ?? string.Empty, Data.RecipientEmail ?? string.Empty, Data.RecipientName ?? string.Empty, Data.TargetCurrency ?? string.Empty, FilePath); // отправка файла на почту
             }
 
             catch (Exception Exception)
@@ -44,7 +45,7 @@ namespace ExchangeRatesRPA
 
             if (HtmlNodeCollection != null && HtmlNodeCollection.Count >= 2)
             {
-                if (decimal.TryParse(HtmlNodeCollection[1].InnerText, out decimal CurrencyRate))
+                if (decimal.TryParse(HtmlNodeCollection[4].InnerText, NumberStyles.Any, new CultureInfo("ru-RU"), out decimal CurrencyRate))
                 {
                     return CurrencyRate;
                 }
@@ -81,7 +82,7 @@ namespace ExchangeRatesRPA
         /// <param name="RecipientName">Инициалы получателя</param>
         /// <param name="CurrencyName">Название валюты</param>
         /// <param name="AttachmentPath">Путь к файлу .CSV</param>
-        private static void SendEmail(string SenderEmail, string SenderName, string RecipientEmail, string RecipientName, string CurrencyName, string AttachmentPath)
+        private static void SendEmail(string SenderEmail, string SenderPassword, string SenderName, string RecipientEmail, string RecipientName, string CurrencyName, string AttachmentPath)
         {
             MailAddress FromMailAddress = new($"{SenderEmail}", $"{SenderName}");
             MailAddress ToMailAddress = new($"{RecipientEmail}", $"{RecipientName}");
@@ -91,12 +92,12 @@ namespace ExchangeRatesRPA
 
             SmtpClient SmtpClient = new()
             {
-                Host = "smtp.example.com",
+                Host = "smtp.gmail.com",
                 Port = 587,
                 EnableSsl = true,
                 DeliveryMethod = SmtpDeliveryMethod.Network,
                 UseDefaultCredentials = false,
-                Credentials = new NetworkCredential("your_email@example.com", "your_password")
+                Credentials = new NetworkCredential($"{SenderEmail}", $"{SenderPassword}")
             };
 
             using MailMessage Message = new(FromMailAddress, ToMailAddress)

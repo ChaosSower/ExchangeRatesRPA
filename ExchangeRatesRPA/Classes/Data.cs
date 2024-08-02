@@ -24,6 +24,11 @@ namespace ExchangeRatesRPA.Classes
         public static string? SenderEmail { get; private set; }
 
         /// <summary>
+        /// Пароль от почты отправителя
+        /// </summary>
+        public static string? SenderPassword { get; private set; }
+
+        /// <summary>
         /// Инициалы отправителя
         /// </summary>
         public static string? SenderName { get; private set; }
@@ -56,6 +61,12 @@ namespace ExchangeRatesRPA.Classes
                     case "SenderEmail":
 
                         SenderEmail = AppSettings[Key];
+
+                        break;
+
+                    case "SenderPassword":
+
+                        SenderPassword = AppSettings[Key];
 
                         break;
 
